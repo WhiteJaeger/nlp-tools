@@ -7,7 +7,7 @@ export default function Navigation() {
             <nav className="navbar navbar-expand navbar-dark bg-dark">
                 <div className="container-fluid">
                     <NavLink className="navbar-brand" to="/">
-                        My App
+                        NLP Tools
                     </NavLink>
                     <div className="collapse navbar-collapse">
                         <div className="navbar-nav">

@@ -1,8 +1,12 @@
-from flask import Flask, json, request
-import datetime
-from constants import UPLOADS_DIR, IMAGES_DIR, METRICS_MAP
-import os
 import secrets
+
+import datetime
+import os
+from flask import Flask, json, request
+
+from NLP.constants import METRICS_MAP, METRICS_FUNCTIONS
+from NLP.text_utils import prepare_str
+from constants import UPLOADS_DIR, IMAGES_DIR
 
 
 def create_app() -> Flask:
@@ -38,8 +42,32 @@ def available_gram_metrics():
 @APP.route('/api/n-gram-metric', methods=['POST'])
 def n_gram_metric():
     data = request.get_json()
-    print(data)
-    return json.dumps('OK')
+    preprocessing = data['preprocessing']
+    metric = data['metric']
+
+    prepared_reference = prepare_str(text=data['reference'],
+                                     text_lower_case=preprocessing['lowercase'],
+                                     contraction_expansion=preprocessing['expandContractions'],
+                                     special_char_removal=preprocessing['removeSpecialCharacters'])
+    prepared_hypothesis = prepare_str(text=data['hypothesis'],
+                                      text_lower_case=preprocessing['lowercase'],
+                                      contraction_expansion=preprocessing['expandContractions'],
+                                      special_char_removal=preprocessing['removeSpecialCharacters'])
+
+    if metric in ('rouge', 'meteor', 'chrf'):
+        result = METRICS_FUNCTIONS[metric](prepared_reference, prepared_hypothesis)
+    else:
+        prepared_hypothesis = prepared_hypothesis.split()
+        prepared_reference = prepared_reference.split()
+        result = METRICS_FUNCTIONS[metric]([prepared_reference], prepared_hypothesis)
+
+    output = {
+        'reference': data['reference'],
+        'hypothesis': data['hypothesis'],
+        'metric': METRICS_MAP[metric],
+        'score': round(result, 2) if result > .001 else 0
+    }
+    return json.dumps(output)
 
 
 if __name__ == '__main__':
