@@ -35,5 +35,12 @@ def available_gram_metrics():
     return json.dumps(METRICS_MAP)
 
 
+@APP.route('/api/n-gram-metric', methods=['POST'])
+def n_gram_metric():
+    data = request.get_json()
+    print(data)
+    return json.dumps('OK')
+
+
 if __name__ == '__main__':
     APP.run(debug=True)
