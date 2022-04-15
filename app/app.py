@@ -3,6 +3,7 @@ import secrets
 import datetime
 import os
 from flask import Flask, json, request
+from nltk import sent_tokenize
 
 from NLP.constants import METRICS_MAP, METRICS_FUNCTIONS
 from NLP.text_utils import prepare_str
@@ -57,8 +58,8 @@ def n_gram_metric():
     if metric in ('rouge', 'meteor', 'chrf'):
         result = METRICS_FUNCTIONS[metric](prepared_reference, prepared_hypothesis)
     else:
-        prepared_hypothesis = prepared_hypothesis.split()
-        prepared_reference = prepared_reference.split()
+        prepared_hypothesis = sent_tokenize(prepared_hypothesis)
+        prepared_reference = sent_tokenize(prepared_reference)
         result = METRICS_FUNCTIONS[metric]([prepared_reference], prepared_hypothesis)
 
     output = {
