@@ -1,6 +1,6 @@
 import React from "react";
 
-export function OutputContainer(props) {
+export default function OutputContainer(props) {
     return (
         <>
             <hr/>

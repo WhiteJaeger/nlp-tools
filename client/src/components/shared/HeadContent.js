@@ -1,6 +1,6 @@
 import React from "react";
 
-export function HeadContent(props) {
+export default function HeadContent(props) {
     return (
         <>
             <div className="head-content container border my-3 pt-3">

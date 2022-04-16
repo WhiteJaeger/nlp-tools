@@ -1,6 +1,6 @@
 import React from "react";
 
-export function TextArea(props) {
+export default function TextArea(props) {
     return (
         <div className={props.containerClass}>
             <span className="input-group-text">{props.displayText}</span>

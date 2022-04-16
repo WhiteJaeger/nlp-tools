@@ -1,13 +1,17 @@
 import secrets
+from pathlib import Path
 
 import datetime
 import os
-from flask import Flask, json, request
+from flask import Flask, json, request, send_from_directory
 from nltk import sent_tokenize
+from spacy import displacy
 
 from NLP.constants import METRICS_MAP, METRICS_FUNCTIONS
 from NLP.text_utils import prepare_str
 from constants import UPLOADS_DIR, IMAGES_DIR
+from models import SPACY_MODEL
+from utils import generate_salt, purge_old_files
 
 
 def create_app() -> Flask:
@@ -69,6 +73,30 @@ def n_gram_metric():
         'score': round(result, 2) if result > .001 else 0
     }
     return json.dumps(output)
+
+
+@APP.route('/api/sentence-trees', methods=['POST'])
+def sentence_trees():
+    data = request.get_json()
+    sentence = data['sentence']
+    spacy_doc = SPACY_MODEL(sentence)
+    output_path = os.path.join(IMAGES_DIR, f'sentence_tree_{generate_salt()}.svg')
+    svg_tree = displacy.render(spacy_doc, style='dep', options={'bg': '#fafafa'})
+    purge_old_files(IMAGES_DIR)
+
+    with open(output_path, 'w', encoding='utf-8') as tree_file:
+        tree_file.write(svg_tree)
+
+    output = {
+        'sentence': sentence,
+        'imageSource': Path(output_path).name
+    }
+    return json.dumps(output)
+
+
+@APP.route('/images/<path:filename>', methods=['GET'])
+def serve_image(filename: str):
+    return send_from_directory(IMAGES_DIR, filename)
 
 
 if __name__ == '__main__':

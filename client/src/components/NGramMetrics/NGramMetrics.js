@@ -1,9 +1,10 @@
 import React, {useEffect, useRef, useState} from "react";
-import {fetchAndSetData} from "../../utils";
+import {fetchAndSetData, postAndGetResponse} from "../../utils";
 import Checkbox from "../shared/Checkbox";
-import {TextArea} from "../shared/TextArea";
-import {HeadContent} from "../shared/HeadContent";
-import {OutputContainer} from "./OutputContainer";
+import TextArea from "../shared/TextArea";
+import HeadContent from "../shared/HeadContent";
+import Loading from "../shared/Loading";
+import OutputContainer from "./OutputContainer";
 
 
 export default function NGramMetrics() {
@@ -26,15 +27,16 @@ export default function NGramMetrics() {
     function renderMetrics(metricsData) {
         const metricsView = []
         for (const [metric, displayName] of Object.entries(metricsData)) {
-            metricsView.push(<option value={metric}>{displayName}</option>)
+            metricsView.push(<option key={metric} value={metric}>{displayName}</option>)
         }
         return metricsView;
     }
 
-    async function handleSubmit(event) {
+    function handleSubmit(event) {
         event.preventDefault();
         setIsLoading(true);
         setShowOutput(false);
+
         const data = {
             preprocessing: {
                 expandContractions: expandContractions.current.checked,
@@ -45,33 +47,25 @@ export default function NGramMetrics() {
             reference: reference,
             metric: metric
         };
-        const response = await fetch('/api/n-gram-metric', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-        const serverResponse = await response.json();
-        setIsLoading(false);
-        for (const setFunction of [setMetric, setReference, setHypothesis]) {
-            setFunction('');
-        }
-        for (const reference of [expandContractions, lowercase, removeSpecialCharacters]) {
-            reference.current.checked = false;
-        }
+        postAndGetResponse('/api/n-gram-metric', data).then((serverResponse) => {
+            setIsLoading(false);
+            for (const setFunction of [setMetric, setReference, setHypothesis]) {
+                setFunction('');
+            }
+            for (const checkboxReference of [expandContractions, lowercase, removeSpecialCharacters]) {
+                checkboxReference.current.checked = false;
+            }
 
-        setOutput(serverResponse);
-        setShowOutput(true);
+            setOutput(serverResponse);
+            setShowOutput(true);
+        });
     }
 
     if (isLoading) {
         return (
-            <h2>Loading...</h2>
+            <Loading/>
         )
     } else {
-
         return (
             <>
                 <div className="container" id="n-gram-metrics">
