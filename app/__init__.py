@@ -3,8 +3,6 @@ import secrets
 import os
 from flask import Flask
 
-from NLP.constants import METRICS_MAP, METRICS_FUNCTIONS
-from NLP.text_utils import prepare_str
 from constants import UPLOADS_DIR, IMAGES_DIR, SERVER_MODE
 from models import SPACY_MODEL
 from utils import generate_salt, purge_old_files
