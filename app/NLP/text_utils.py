@@ -1,7 +1,5 @@
-import re
-from typing import Union, List
-
 import nltk
+import re
 from nltk.tokenize.toktok import ToktokTokenizer
 
 from app.NLP.constants import CONTRACTION_MAP
@@ -11,13 +9,12 @@ stopword_list.remove('no')
 stopword_list.remove('not')
 
 
-def prepare_str(text: str,
-                contraction_expansion=True,
-                text_lower_case=False,
-                special_char_removal=True,
-                stopword_removal=False,
-                remove_digits=False,
-                pos_preparation=False) -> Union[List[List[dict]], str]:
+def prepare_text(text: str,
+                 contraction_expansion=True,
+                 lowercase=False,
+                 remove_spec_characters=True,
+                 filter_stopwords=False,
+                 remove_digits=False) -> str:
     """
     Preprocess the given string
     """
@@ -26,11 +23,11 @@ def prepare_str(text: str,
         text = expand_contractions(text)
 
     # lowercase the text
-    if text_lower_case:
+    if lowercase:
         text = text.lower()
 
     # remove special characters and\or digits
-    if special_char_removal:
+    if remove_spec_characters:
         # insert spaces between special characters to isolate them
         special_char_pattern = re.compile(r'([{.(-)!}])')
         text = special_char_pattern.sub(" \\1 ", text)
@@ -39,23 +36,32 @@ def prepare_str(text: str,
         text = re.sub(r'\s+', ' ', text)
 
     # remove stopwords
-    if stopword_removal:
-        text = remove_stopwords(text, is_lower_case=text_lower_case)
-
-    if pos_preparation:
-        # TODO: extract into different function
-        # TODO: consider splitting text into sentences
-        text = [text.split()]
-
-        prepared_text = []
-        for sentence in text:
-            prepared_text.append([encode_word(sentence, w_index) for w_index in range(len(sentence))])
-        return prepared_text
+    if filter_stopwords:
+        text = remove_stopwords(text, is_lower_case=lowercase)
 
     return text
 
 
-def map_word_pos(prepared_sentence: str, pos_tags: list) -> list:
+def prepare_sentence_for_pos_tagging(sentence: str) -> dict:
+    result = {
+        'cleared_sentence': None,
+        'pos_tagging_ready_sentence': None
+    }
+
+    sentence = prepare_text(text=sentence, contraction_expansion=True, lowercase=True, remove_spec_characters=True,
+                            remove_digits=True)
+    result['cleared_sentence'] = sentence
+
+    text = [sentence.split()]
+    prepared_text = []
+    for sentence_ in text:
+        prepared_text.append([encode_word(sentence_, w_index) for w_index in range(len(sentence_))])
+
+    result['pos_tagging_ready_sentence'] = prepared_text
+    return result
+
+
+def map_word_to_pos(prepared_sentence: str, pos_tags: list) -> list:
     words = prepared_sentence.split()
 
     mapped = zip(words, pos_tags)
@@ -88,7 +94,7 @@ def expand_contractions(text, contraction_mapping=CONTRACTION_MAP):
     return expanded_text
 
 
-def remove_special_characters(text, remove_digits=False) -> str:
+def remove_special_characters(text: str, remove_digits=False) -> str:
     """
     Utils function to remove special characters.
     """

@@ -4,8 +4,8 @@ import os
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 
-from app.constants import UPLOADS_DIR, IMAGES_DIR, SERVER_MODE
 from app import api
+from app.constants import UPLOADS_DIR, IMAGES_DIR, SERVER_MODE
 
 
 def create_app() -> Flask:

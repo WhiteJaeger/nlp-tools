@@ -6,35 +6,34 @@ from pathlib import Path
 from spacy import displacy
 
 from NLP.constants import METRICS_MAP, METRICS_FUNCTIONS
-from NLP.text_utils import prepare_str
-from constants import IMAGES_DIR
-from models import SPACY_MODEL
+from NLP.text_utils import prepare_text, prepare_sentence_for_pos_tagging, map_word_to_pos
+from constants import IMAGES_DIR, SPACY_MODEL, POS_TAGGER
 from utils import generate_salt, purge_old_files
 
-api_bp = Blueprint('api', __name__, url_prefix='/')
+api_bp = Blueprint('api', __name__, url_prefix='/api')
 
 
-@api_bp.route('/api/available-metrics')
+@api_bp.route('/available-metrics')
 @cross_origin()
 def available_gram_metrics():
     return json.dumps(METRICS_MAP)
 
 
-@api_bp.route('/api/n-gram-metric', methods=['POST'])
+@api_bp.route('/n-gram-metric', methods=['POST'])
 @cross_origin()
 def n_gram_metric():
     data = request.get_json()
     preprocessing = data['preprocessing']
     metric = data['metric']
 
-    prepared_reference = prepare_str(text=data['reference'],
-                                     text_lower_case=preprocessing['lowercase'],
-                                     contraction_expansion=preprocessing['expandContractions'],
-                                     special_char_removal=preprocessing['removeSpecialCharacters'])
-    prepared_hypothesis = prepare_str(text=data['hypothesis'],
-                                      text_lower_case=preprocessing['lowercase'],
+    prepared_reference = prepare_text(text=data['reference'],
+                                      lowercase=preprocessing['lowercase'],
                                       contraction_expansion=preprocessing['expandContractions'],
-                                      special_char_removal=preprocessing['removeSpecialCharacters'])
+                                      remove_spec_characters=preprocessing['removeSpecialCharacters'])
+    prepared_hypothesis = prepare_text(text=data['hypothesis'],
+                                       lowercase=preprocessing['lowercase'],
+                                       contraction_expansion=preprocessing['expandContractions'],
+                                       remove_spec_characters=preprocessing['removeSpecialCharacters'])
 
     if metric in ('rouge', 'meteor', 'chrf'):
         result = METRICS_FUNCTIONS[metric](prepared_reference, prepared_hypothesis)
@@ -52,7 +51,7 @@ def n_gram_metric():
     return json.dumps(output)
 
 
-@api_bp.route('/api/sentence-trees', methods=['POST'])
+@api_bp.route('/sentence-trees', methods=['POST'])
 @cross_origin()
 def sentence_trees():
     data = request.get_json()
@@ -72,7 +71,21 @@ def sentence_trees():
     return json.dumps(output)
 
 
-@api_bp.route('/api/images/<path:filename>', methods=['GET'])
+@api_bp.route('/pos', methods=['POST'])
+@cross_origin()
+def pos():
+    data = request.get_json()
+    sentence = data['sentence']
+    result = prepare_sentence_for_pos_tagging(sentence)
+    predicted_pos = POS_TAGGER.predict(result['pos_tagging_ready_sentence'])[0]
+    output = {
+        'sentence': sentence,
+        'posTags': map_word_to_pos(result['cleared_sentence'], predicted_pos)
+    }
+    return json.dumps(output)
+
+
+@api_bp.route('/images/<path:filename>', methods=['GET'])
 @cross_origin()
 def serve_image(filename: str):
     return send_from_directory(IMAGES_DIR, filename)
