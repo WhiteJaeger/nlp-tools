@@ -1,7 +1,7 @@
 import secrets
 
 import os
-from flask import Flask
+from flask import Flask, send_from_directory
 
 from app.constants import UPLOADS_DIR, IMAGES_DIR, SERVER_MODE
 
@@ -29,3 +29,8 @@ def create_app() -> Flask:
 
 
 APP = create_app()
+
+
+@APP.route('/')
+def serve():
+    return send_from_directory(APP.static_folder, 'index.html')

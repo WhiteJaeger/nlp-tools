@@ -12,11 +12,6 @@ from utils import generate_salt, purge_old_files
 from server import APP
 
 
-@APP.route('/')
-def serve():
-    return send_from_directory(APP.static_folder, 'index.html')
-
-
 @APP.route('/api/available-metrics')
 def available_gram_metrics():
     return json.dumps(METRICS_MAP)
