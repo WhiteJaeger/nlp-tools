@@ -9,7 +9,7 @@ from NLP.text_utils import prepare_str
 from constants import IMAGES_DIR
 from models import SPACY_MODEL
 from utils import generate_salt, purge_old_files
-from .. import APP
+from server import APP
 
 
 @APP.route('/')
