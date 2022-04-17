@@ -1,7 +1,6 @@
 import secrets
 from pathlib import Path
 
-import datetime
 import os
 from flask import Flask, json, request, send_from_directory
 from nltk import sent_tokenize
@@ -9,7 +8,7 @@ from spacy import displacy
 
 from NLP.constants import METRICS_MAP, METRICS_FUNCTIONS
 from NLP.text_utils import prepare_str
-from constants import UPLOADS_DIR, IMAGES_DIR
+from constants import UPLOADS_DIR, IMAGES_DIR, SERVER_MODE
 from models import SPACY_MODEL
 from utils import generate_salt, purge_old_files
 
@@ -19,8 +18,12 @@ def create_app() -> Flask:
     os.makedirs(IMAGES_DIR, exist_ok=True)
 
     # Setup flask app
-    app = Flask(__name__)
+    if SERVER_MODE == 'development':
+        app = Flask(__name__)
+    else:
+        app = Flask(__name__, static_folder='../client/build', static_url_path='')
     app.secret_key = os.getenv('SECRET_KEY', secrets.token_urlsafe())
+
     # Max of 5MB for files
     app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
     # Allowed ext
@@ -28,15 +31,16 @@ def create_app() -> Flask:
     # Uploads folder
     os.makedirs(UPLOADS_DIR, exist_ok=True)
     app.config['UPLOAD_PATH'] = UPLOADS_DIR
+
     return app
 
 
 APP = create_app()
 
 
-@APP.route('/api/time')
-def time():
-    return {'time': datetime.datetime.today()}
+@APP.route('/')
+def serve():
+    return send_from_directory(APP.static_folder, 'index.html')
 
 
 @APP.route('/api/available-metrics')
