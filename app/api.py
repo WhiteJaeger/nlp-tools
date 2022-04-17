@@ -1,5 +1,5 @@
 import os
-from flask import json, request, send_from_directory
+from flask import json, request, send_from_directory, Blueprint
 from flask_cors import cross_origin
 from nltk import sent_tokenize
 from pathlib import Path
@@ -10,16 +10,17 @@ from NLP.text_utils import prepare_str
 from constants import IMAGES_DIR
 from models import SPACY_MODEL
 from utils import generate_salt, purge_old_files
-from server import APP
+
+api_bp = Blueprint('api', __name__, url_prefix='/')
 
 
-@APP.route('/api/available-metrics')
+@api_bp.route('/api/available-metrics')
 @cross_origin()
 def available_gram_metrics():
     return json.dumps(METRICS_MAP)
 
 
-@APP.route('/api/n-gram-metric', methods=['POST'])
+@api_bp.route('/api/n-gram-metric', methods=['POST'])
 @cross_origin()
 def n_gram_metric():
     data = request.get_json()
@@ -51,7 +52,7 @@ def n_gram_metric():
     return json.dumps(output)
 
 
-@APP.route('/api/sentence-trees', methods=['POST'])
+@api_bp.route('/api/sentence-trees', methods=['POST'])
 @cross_origin()
 def sentence_trees():
     data = request.get_json()
@@ -71,11 +72,7 @@ def sentence_trees():
     return json.dumps(output)
 
 
-@APP.route('/api/images/<path:filename>', methods=['GET'])
+@api_bp.route('/api/images/<path:filename>', methods=['GET'])
 @cross_origin()
 def serve_image(filename: str):
     return send_from_directory(IMAGES_DIR, filename)
-
-
-if __name__ == '__main__':
-    APP.run(debug=True)
