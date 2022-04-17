@@ -2,6 +2,7 @@ import secrets
 
 import os
 from flask import Flask, send_from_directory
+from flask_cors import CORS
 
 from app.constants import UPLOADS_DIR, IMAGES_DIR, SERVER_MODE
 
@@ -15,6 +16,7 @@ def create_app() -> Flask:
         app = Flask(__name__)
     else:
         app = Flask(__name__, static_folder='client/build', static_url_path='')
+        cors = CORS(app)
     app.secret_key = os.getenv('SECRET_KEY', secrets.token_urlsafe())
 
     # Max of 5MB for files

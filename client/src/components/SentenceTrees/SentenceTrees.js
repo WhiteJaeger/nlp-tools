@@ -4,6 +4,7 @@ import TextArea from "../shared/TextArea";
 import Loading from "../shared/Loading";
 import OutputContainer from "./OutputContainer";
 import {postAndGetResponse} from "../../utils";
+import {API_BASE_URL} from "../../constants";
 
 
 export default function SentenceTrees() {
@@ -13,7 +14,7 @@ export default function SentenceTrees() {
     const [output, setOutput] = useState({sentence: '', imageSource: ''});
 
     async function fetchImage(imageName) {
-        const response = await fetch('/images/' + imageName);
+        const response = await fetch(API_BASE_URL + '/images/' + imageName);
         const blob = await response.blob();
         return URL.createObjectURL(blob);
     }
@@ -26,7 +27,7 @@ export default function SentenceTrees() {
         const data = {
             sentence: sentence
         };
-        const serverData = await postAndGetResponse('/api/sentence-trees', data);
+        const serverData = await postAndGetResponse(API_BASE_URL + '/sentence-trees', data);
         await fetchImage(serverData['imageSource']).then((image) => {
             setOutput({imageSource: image, sentence: serverData['sentence']});
             setIsLoading(false);

@@ -1,5 +1,6 @@
 import os
 from flask import json, request, send_from_directory
+from flask_cors import cross_origin
 from nltk import sent_tokenize
 from pathlib import Path
 from spacy import displacy
@@ -13,11 +14,13 @@ from server import APP
 
 
 @APP.route('/api/available-metrics')
+@cross_origin()
 def available_gram_metrics():
     return json.dumps(METRICS_MAP)
 
 
 @APP.route('/api/n-gram-metric', methods=['POST'])
+@cross_origin()
 def n_gram_metric():
     data = request.get_json()
     preprocessing = data['preprocessing']
@@ -49,6 +52,7 @@ def n_gram_metric():
 
 
 @APP.route('/api/sentence-trees', methods=['POST'])
+@cross_origin()
 def sentence_trees():
     data = request.get_json()
     sentence = data['sentence']
@@ -67,7 +71,8 @@ def sentence_trees():
     return json.dumps(output)
 
 
-@APP.route('/images/<path:filename>', methods=['GET'])
+@APP.route('/api/images/<path:filename>', methods=['GET'])
+@cross_origin()
 def serve_image(filename: str):
     return send_from_directory(IMAGES_DIR, filename)
 

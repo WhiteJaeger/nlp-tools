@@ -5,6 +5,7 @@ import TextArea from "../shared/TextArea";
 import HeadContent from "../shared/HeadContent";
 import Loading from "../shared/Loading";
 import OutputContainer from "./OutputContainer";
+import {API_BASE_URL} from "../../constants";
 
 
 export default function NGramMetrics() {
@@ -21,7 +22,7 @@ export default function NGramMetrics() {
     const lowercase = useRef(null);
 
     useEffect(() => {
-        fetchAndSetData('/api/available-metrics', setMetrics);
+        fetchAndSetData(API_BASE_URL + '/available-metrics', setMetrics);
     }, []);
 
     function renderMetrics(metricsData) {
@@ -47,7 +48,7 @@ export default function NGramMetrics() {
             reference: reference,
             metric: metric
         };
-        postAndGetResponse('/api/n-gram-metric', data).then((serverResponse) => {
+        postAndGetResponse(API_BASE_URL + '/n-gram-metric', data).then((serverResponse) => {
             setIsLoading(false);
             for (const setFunction of [setMetric, setReference, setHypothesis]) {
                 setFunction('');
