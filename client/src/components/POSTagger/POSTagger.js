@@ -11,44 +11,6 @@ export default function POSTagger() {
     const [showOutput, setShowOutput] = useState(false);
     const [output, setOutput] = useState({sentence: '', posTags: []});
 
-    function renderWordToPOSMap(wordToPOSMap) {
-        const elements = wordToPOSMap.map((wordToPOS, idx) => {
-            return (
-                <>
-                    <tr key={idx}>
-                        <td>
-                            {wordToPOS[0]}
-                        </td>
-                        <td>
-                            {wordToPOS[1]}
-                        </td>
-                    </tr>
-                </>
-            )
-        })
-        return (
-            <>
-                <div className="container w-50">
-                    <table className="table table-hover table-bordered">
-                        <thead>
-                        <tr>
-                            <th>
-                                Word
-                            </th>
-                            <th>
-                                Part-of-speech
-                            </th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {elements}
-                        </tbody>
-                    </table>
-                </div>
-            </>
-        )
-    }
-
     async function handleSubmit(event) {
         event.preventDefault();
         setIsLoading(true);
@@ -58,7 +20,6 @@ export default function POSTagger() {
             sentence: sentence
         };
         await postAndGetResponse('pos', data).then((data) => {
-            console.log(data);
             setOutput({sentence: data['sentence'], posTags: data['posTags']});
             setIsLoading(false);
             setShowOutput(true);
@@ -88,7 +49,7 @@ Training set consisted of ~60000 sentences, testing set of ~25000 sentences."
                 </div>
                 {showOutput && <OutputContainer
                     sentence={output.sentence}
-                    elements={renderWordToPOSMap(output.posTags)}
+                    elements={output.posTags}
                 />}
             </>
         )
