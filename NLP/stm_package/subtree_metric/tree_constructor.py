@@ -109,13 +109,6 @@ if __name__ == '__main__':
     print(a.grand_children)
     print('*' * 100)
 
-    a = SyntaxTreeElementsExtractor(heads_extractor.second_level_heads[1])
-    print(a.head)
-    print(a.length)
-    print(a.children)
-    print(a.grand_children)
-    print('*' * 100)
-
     a = SyntaxTreeElementsExtractor(doc[-1])
     print(a.head)
     print(a.length)

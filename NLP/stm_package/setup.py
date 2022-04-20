@@ -31,6 +31,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     packages=['subtree_metric'],
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     install_requires=requirements
 )

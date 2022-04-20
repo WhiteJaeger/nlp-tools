@@ -66,6 +66,8 @@ def are_descendants_identical(ref_extractor: SyntaxTreeElementsExtractor,
     ref_grandchildren_tags = transform_into_tags(ref_extractor.grand_children)
     hyp_grandchildren_tags = transform_into_tags(hyp_extractor.grand_children)
 
+    # Naive assumption - tags can be from different heads
+    # TODO: compare per-head
     are_children_identical = sorted(ref_children_tags) == sorted(hyp_children_tags)
     are_grandchildren_identical = sorted(ref_grandchildren_tags) == sorted(hyp_grandchildren_tags)
 
@@ -74,7 +76,7 @@ def are_descendants_identical(ref_extractor: SyntaxTreeElementsExtractor,
 
 def sentence_stm(reference: str, hypothesis: str, nlp_model: Language, depth: int = 3) -> float:
     """
-    Calculate sentence-level stm_package score.
+    Calculate sentence-level Subtree Metric score.
         >>> hypothesis = 'It is a guide to action which ensures that the military always obeys the commands of the party'
         >>> reference = 'It is the guiding to action that ensures that the military will forever heed Party commands'
         >>> sentence_stm(reference, hypothesis, spacy_model, depth=3)
@@ -156,36 +158,12 @@ def sentence_stm(reference: str, hypothesis: str, nlp_model: Language, depth: in
     return round(score / depth, 4)
 
 
-def sentence_stm_several_references(references: List[str],
-                                    hypothesis: str,
-                                    nlp_model: Language,
-                                    depth: int = 3) -> float:
-    """
-    Calculate sentence-level stm_package score with several references vs. one hypothesis
-    :param references: reference sentences
-    :type references: List[str]
-    :param hypothesis: hypothesis sentence
-    :type hypothesis: str
-    :param nlp_model: one of the SpaCy NLP models with support of the DependencyParser (https://spacy.io/models)
-    :type nlp_model: Language
-    :param depth: depth of the subtrees to take into account
-    :type depth: int
-    :return: stm_package score
-    :rtype: float
-    """
-    nominator = 0
-    denominator = len(references)
-    for reference in references:
-        nominator += sentence_stm(reference, hypothesis, nlp_model, depth)
-    return round(nominator / denominator, 4)
-
-
 def corpus_stm(references: List[str],
                hypotheses: List[str],
                nlp_model: Language,
                depth: int) -> float:
     """
-    Calculate corpus-level stm_package score
+    Calculate corpus-level Subtree Metric score
     :param hypotheses: hypotheses
     :type hypotheses: list[str]
     :param references: references
@@ -197,7 +175,6 @@ def corpus_stm(references: List[str],
     :return: Corpus stm_package score
     :rtype: float
     """
-    # TODO: introduce sanity checks
 
     score = 0
 
@@ -213,11 +190,11 @@ def corpus_stm_augmented(references: List[str],
                          depth: int = 3,
                          make_summary: bool = True) -> Union[float, Dict[str, Union[int, list]]]:
     """
-    Calculate corpus-level stm_package score with additional weights from sentiment and genre classifiers - stm_package-Augmented
+    Calculate corpus-level Subtree Metric score with additional weights from embeddings
     :param hypotheses: hypotheses
-    :type hypotheses: list[str]
+    :type hypotheses: List[str]
     :param references: references
-    :type references: list[str]
+    :type references: List[str]
     :param nlp_model: one of the SpaCy NLP models with support of the DependencyParser (https://spacy.io/models)
     :type nlp_model: Language
     :param depth: depth of the subtrees to take into account
