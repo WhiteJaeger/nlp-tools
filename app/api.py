@@ -5,9 +5,8 @@ from nltk import sent_tokenize
 from pathlib import Path
 from spacy import displacy
 
-from NLP.constants import METRICS_MAP, METRICS_FUNCTIONS
-from NLP.text_utils import prepare_text, prepare_sentence_for_pos_tagging, map_word_to_pos
-from constants import IMAGES_DIR, SPACY_MODEL, POS_TAGGER
+from constants import IMAGES_DIR, SPACY_MODEL, POS_TAGGER, METRICS_MAP, METRICS_FUNCTIONS
+from text_utils import prepare_text, prepare_sentence_for_pos_tagging, map_word_to_pos
 from utils import generate_salt, purge_old_files
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
