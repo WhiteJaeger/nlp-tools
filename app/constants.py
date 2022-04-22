@@ -11,3 +11,4 @@ SERVER_MODE = os.getenv('SERVER_MODE')
 
 SPACY_MODEL: spacy.Language = spacy.load('en_core_web_md')
 POS_TAGGER = load(os.path.join(MODELS_DIR, 'posTagger.joblib'))
+TF_IDF_VECTORIZER = load(os.path.join(MODELS_DIR, 'TFIDFVectorizer.joblib'))

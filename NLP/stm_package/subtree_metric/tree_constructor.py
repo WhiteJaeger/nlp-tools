@@ -1,5 +1,6 @@
 import spacy
 from spacy.tokens import Doc, Token
+from typing import Tuple, Union
 
 
 class SyntaxTreeHeadsExtractor:
@@ -14,19 +15,19 @@ class SyntaxTreeHeadsExtractor:
         self.second_level_heads = self.__extract_heads_2_length()
         self.third_level_heads = self.__extract_heads_3_length()
 
-    def __extract_heads_1_length(self) -> tuple:
+    def __extract_heads_1_length(self) -> Tuple[Token]:
         return tuple(token for token in self.__parsed_doc)
 
-    def __extract_heads_2_length(self) -> tuple:
+    def __extract_heads_2_length(self) -> Tuple[Token]:
         result = []
         for token in self.__parsed_doc:
             if tuple(token.children):
                 result.append(token)
         return tuple(result)
 
-    def __extract_heads_3_length(self) -> tuple:
+    def __extract_heads_3_length(self) -> Tuple[Token]:
         result = []
-        two_length: tuple = self.__extract_heads_2_length()
+        two_length = self.__extract_heads_2_length()
         for token in two_length:
             for child in token.children:
                 if tuple(child.children):
@@ -60,10 +61,10 @@ class SyntaxTreeElementsExtractor:
     def head(self) -> Token:
         return self.head_token
 
-    def __get_2_level_deep(self) -> tuple:
+    def __get_2_level_deep(self) -> Tuple[Token]:
         return tuple(self.head.children)
 
-    def __get_3_level_deep(self) -> tuple:
+    def __get_3_level_deep(self) -> Union[Tuple[Token], Tuple]:
         result = []
         second_level = self.__get_2_level_deep()
         if not second_level:
