@@ -250,11 +250,15 @@ def sentence_stm_augmented(reference: str,
                     # Check if their children are identical
                     if sorted(ref_children_tags) == sorted(hyp_children_tags):
                         # Reconstruct text versions
+                        children_texts_reference = [child.text for child in
+                                                    SyntaxTreeElementsExtractor(two_level_head_ref).children]
                         tree_text_reference = ' '.join([two_level_head_ref.text,
-                                                        *SyntaxTreeElementsExtractor(two_level_head_ref).children])
+                                                        *children_texts_reference])
 
-                        tree_text_hypotheses = ' '.join([two_level_head_ref.text,
-                                                        *SyntaxTreeElementsExtractor(two_level_head_ref).children])
+                        children_texts_hypotheses = [child.text for child in
+                                                     SyntaxTreeElementsExtractor(two_level_head_hyp).children]
+                        tree_text_hypotheses = ' '.join([two_level_head_hyp.text,
+                                                         *children_texts_hypotheses])
 
                         weighted_count += get_similarity_between_docs(nlp_model(tree_text_reference),
                                                                       nlp_model(tree_text_hypotheses),
@@ -266,7 +270,7 @@ def sentence_stm_augmented(reference: str,
 
     if depth >= 3:
         # Compute for 3-level-trees
-        count = 0
+        weighted_count = 0
         third_level_hyp = sentence_tree_heads_hypothesis.third_level_heads
         third_level_ref = sentence_tree_heads_reference.third_level_heads
         used_heads_indexes = []
@@ -279,12 +283,32 @@ def sentence_stm_augmented(reference: str,
                     # Get children & grandchildren
                     extractor_ref = SyntaxTreeElementsExtractor(third_level_head_ref)
                     extractor_hyp = SyntaxTreeElementsExtractor(third_level_head_hyp)
-                    # Check if their children & grandchildren are identical
+                    # Check if the children & grandchildren are identical
                     if are_descendants_identical(extractor_ref, extractor_hyp):
-                        count += 1
+                        # Reconstruct text versions
+                        children_texts_reference = [child.text for child in
+                                                    SyntaxTreeElementsExtractor(third_level_head_ref).children]
+                        grandchildren_texts_reference = [child.text for child in
+                                                         SyntaxTreeElementsExtractor(
+                                                             third_level_head_ref).grand_children]
+                        tree_text_reference = ' '.join([third_level_head_ref.text,
+                                                        *children_texts_reference, *grandchildren_texts_reference])
+
+                        children_texts_hypotheses = [child.text for child in
+                                                     SyntaxTreeElementsExtractor(third_level_head_hyp).children]
+                        grandchildren_texts_hypothesis = [child.text for child in
+                                                          SyntaxTreeElementsExtractor(
+                                                              third_level_head_hyp).grand_children]
+                        tree_text_hypotheses = ' '.join([third_level_head_hyp.text,
+                                                         *children_texts_hypotheses, *grandchildren_texts_hypothesis])
+
+                        weighted_count += get_similarity_between_docs(nlp_model(tree_text_reference),
+                                                                      nlp_model(tree_text_hypotheses),
+                                                                      vectorizer,
+                                                                      POS_WEIGHTS)
                         used_heads_indexes.append(idx)
 
-        score += count / len(third_level_hyp) if len(third_level_hyp) else 0
+        score += weighted_count / len(third_level_hyp) if len(third_level_hyp) else 0
 
     return round(score / depth, 4)
 
