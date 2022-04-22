@@ -17,13 +17,13 @@ Ding Liu and Daniel Gildea, 2005, Association for Computational Linguistics, Pag
 """
 
 import spacy
+from sklearn.feature_extraction.text import TfidfVectorizer
 from spacy import Language
 from spacy.tokens import Token
-from NLP.stm_package.subtree_metric.tree_constructor import SyntaxTreeHeadsExtractor, SyntaxTreeElementsExtractor
 from typing import Union, Tuple, List, Dict
+
+from NLP.stm_package.subtree_metric.tree_constructor import SyntaxTreeHeadsExtractor, SyntaxTreeElementsExtractor
 from NLP.stm_package.subtree_metric.utils import get_similarity_between_docs, get_tfidf_scores_for_words
-from sklearn.feature_extraction.text import TfidfVectorizer
-from NLP.stm_package.subtree_metric.constants import POS_WEIGHTS
 
 
 def transform_into_tags(tokens: Tuple[Token]) -> tuple:
@@ -220,7 +220,7 @@ def sentence_stm_augmented(reference: str,
 
     # Get scores TF-IDF scores for words
     tfidf_scores_reference = get_tfidf_scores_for_words(reference_preprocessed.text, vectorizer)
-    tfidf_scores_hypothesis = get_tfidf_scores_for_words(reference_preprocessed.text, vectorizer)
+    tfidf_scores_hypothesis = get_tfidf_scores_for_words(hypothesis_preprocessed.text, vectorizer)
 
     tags_first_level_hyp = transform_into_tags(sentence_tree_heads_hypothesis.first_level_heads)
 
@@ -255,16 +255,19 @@ def sentence_stm_augmented(reference: str,
                         tree_text_reference = ' '.join([two_level_head_ref.text,
                                                         *children_texts_reference])
 
-                        children_texts_hypotheses = [child.text for child in
+                        children_texts_hypothesis = [child.text for child in
                                                      SyntaxTreeElementsExtractor(two_level_head_hyp).children]
-                        tree_text_hypotheses = ' '.join([two_level_head_hyp.text,
-                                                         *children_texts_hypotheses])
+                        tree_text_hypothesis = ' '.join([two_level_head_hyp.text,
+                                                         *children_texts_hypothesis])
 
                         weighted_count += get_similarity_between_docs(nlp_model(tree_text_reference),
-                                                                      nlp_model(tree_text_hypotheses),
+                                                                      nlp_model(tree_text_hypothesis),
                                                                       vectorizer,
-                                                                      POS_WEIGHTS)
+                                                                      pos_weights,
+                                                                      tfidf_scores_reference,
+                                                                      tfidf_scores_hypothesis)
                         used_heads_indexes.append(idx)
+                        break
         score += weighted_count / len(sentence_tree_heads_hypothesis.second_level_heads) \
             if len(sentence_tree_heads_hypothesis.second_level_heads) else 0
 
@@ -294,19 +297,22 @@ def sentence_stm_augmented(reference: str,
                         tree_text_reference = ' '.join([third_level_head_ref.text,
                                                         *children_texts_reference, *grandchildren_texts_reference])
 
-                        children_texts_hypotheses = [child.text for child in
+                        children_texts_hypothesis = [child.text for child in
                                                      SyntaxTreeElementsExtractor(third_level_head_hyp).children]
                         grandchildren_texts_hypothesis = [child.text for child in
                                                           SyntaxTreeElementsExtractor(
                                                               third_level_head_hyp).grand_children]
-                        tree_text_hypotheses = ' '.join([third_level_head_hyp.text,
-                                                         *children_texts_hypotheses, *grandchildren_texts_hypothesis])
+                        tree_text_hypothesis = ' '.join([third_level_head_hyp.text,
+                                                         *children_texts_hypothesis, *grandchildren_texts_hypothesis])
 
                         weighted_count += get_similarity_between_docs(nlp_model(tree_text_reference),
-                                                                      nlp_model(tree_text_hypotheses),
+                                                                      nlp_model(tree_text_hypothesis),
                                                                       vectorizer,
-                                                                      POS_WEIGHTS)
+                                                                      pos_weights,
+                                                                      tfidf_scores_reference,
+                                                                      tfidf_scores_hypothesis)
                         used_heads_indexes.append(idx)
+                        break
 
         score += weighted_count / len(third_level_hyp) if len(third_level_hyp) else 0
 
@@ -333,7 +339,6 @@ def corpus_stm_augmented(references: List[str],
     :return: stm_package-A score
     :rtype: float
     """
-    # TODO: introduce sanity checks
     score = 0
 
     return 1
@@ -341,15 +346,16 @@ def corpus_stm_augmented(references: List[str],
 
 if __name__ == '__main__':
     # Usage example
+
     nlp: Language = spacy.load('en_core_web_md')
     ref = 'It is a guide to action that ensures that the military will forever heed Party commands'
     hyp = 'It is a guide to action which ensures that the military always obeys the commands of the party'
-    print(sentence_stm(ref,
-                       hyp,
-                       nlp))
+    print(sentence_stm(reference=ref,
+                       hypothesis=hyp,
+                       nlp_model=nlp))
 
     ref = 'It is a guide to action that ensures that the military will forever heed Party commands'
     hyp = 'It is to insure the troops forever hearing the activity guidebook that party direct'
-    print(sentence_stm(ref,
-                       hyp,
-                       nlp))
+    print(sentence_stm(reference=ref,
+                       hypothesis=hyp,
+                       nlp_model=nlp))
