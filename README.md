@@ -1,9 +1,8 @@
 # NLP Tools
 
-## N-gram based and Syntactic Translation Evaluation Metrics
+## N-gram based and Syntactic Translation Evaluation Metrics and more
 
-This repository contains a Flask web application which aims to help with measuring the performance of the machine &
-human translation. 
+This repository contains a Flask + React web application which provides a convenient web-interface for several NLP tools. 
 
 Translation evaluation metrics include:
 * N-gram based:
@@ -20,8 +19,8 @@ Other NLP Tools:
 * Context Part-of-speech tagger
 * Sentence Trees builder
 
-This app could be accessed either remotely - it is deployed at http://nlp-tools.herokuapp.com/ - or
-locally - by following the steps below.
+This app could be accessed either remotely: it is deployed at http://nlp-tools.herokuapp.com/; or
+locally by following the steps below.
 
 ## Running the app locally
 
