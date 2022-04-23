@@ -4,7 +4,7 @@ import os
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 
-from app import api
+from app.endpoints import BLUEPRINTS
 from app.constants import UPLOADS_DIR, IMAGES_DIR, SERVER_MODE
 
 
@@ -27,7 +27,9 @@ def create_app() -> Flask:
     # Uploads folder
     os.makedirs(UPLOADS_DIR, exist_ok=True)
     app.config['UPLOAD_PATH'] = UPLOADS_DIR
-    app.register_blueprint(api.api_bp)
+
+    for bp in BLUEPRINTS:
+        app.register_blueprint(bp, url_prefix='/api')
 
     return app
 

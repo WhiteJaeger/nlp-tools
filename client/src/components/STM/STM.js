@@ -1,10 +1,10 @@
 import React, {useRef, useState} from "react";
 import {postAndGetResponse} from "../../utils";
-import Checkbox from "../shared/Checkbox";
 import TextArea from "../shared/TextArea";
 import HeadContent from "../shared/HeadContent";
 import Loading from "../shared/Loading";
 import OutputContainer from "./OutputContainer";
+import Preprocessing from "../shared/Preprocessing";
 
 
 export default function STM() {
@@ -78,24 +78,11 @@ export default function STM() {
                                 <option value="3">3</option>
                             </select>
                         </div>
-                        <div className="container border-top border-bottom py-2" id="preprocessing">
-                            <h4 className="py-2">Choose Text Pre-processing</h4>
-                            <Checkbox
-                                reference={expandContractions}
-                                id={"expand-contractions"}
-                                label={"Expand contractions (e.g. I`m -> I am)"}
-                            />
-                            <Checkbox
-                                reference={removeSpecialCharacters}
-                                id={"remove-special-characters"}
-                                label={"Remove special characters (e.g. \",\")"}
-                            />
-                            <Checkbox
-                                reference={lowercase}
-                                id={"lowercase"}
-                                label={"Lowercase"}
-                            />
-                        </div>
+                        <Preprocessing
+                            expandContractions={expandContractions}
+                            removeSpecialCharacters={removeSpecialCharacters}
+                            lowercase={lowercase}
+                        />
                         <div className="input-group d-flex bd-highlight mb-3">
                             <div className="container">
                                 <h4 className="py-2">Type Hypothesis and Reference Translations</h4>

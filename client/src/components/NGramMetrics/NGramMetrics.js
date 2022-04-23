@@ -1,10 +1,10 @@
 import React, {useEffect, useRef, useState} from "react";
 import {fetchAndSetData, postAndGetResponse} from "../../utils";
-import Checkbox from "../shared/Checkbox";
 import TextArea from "../shared/TextArea";
 import HeadContent from "../shared/HeadContent";
 import Loading from "../shared/Loading";
 import OutputContainer from "./OutputContainer";
+import Preprocessing from "../shared/Preprocessing";
 
 
 export default function NGramMetrics() {
@@ -70,7 +70,7 @@ export default function NGramMetrics() {
             <>
                 <div className="container" id="n-gram-metrics">
                     <HeadContent
-                        header="Sentence Level Translation Evaluator"
+                        header="Sentence Level Translation Evaluation"
                         content="This page provides an interface to measure the goodness of a given translation with N-gram based metrics."
                     />
                     <form className="form-control" onSubmit={handleSubmit}>
@@ -89,24 +89,11 @@ export default function NGramMetrics() {
                                 {renderMetrics(metrics)}
                             </select>
                         </div>
-                        <div className="container border-top border-bottom py-2" id="preprocessing">
-                            <h4 className="py-2">Choose Text Pre-processing</h4>
-                            <Checkbox
-                                reference={expandContractions}
-                                id={"expand-contractions"}
-                                label={"Expand contractions (e.g. I`m -> I am)"}
-                            />
-                            <Checkbox
-                                reference={removeSpecialCharacters}
-                                id={"remove-special-characters"}
-                                label={"Remove special characters (e.g. \",\")"}
-                            />
-                            <Checkbox
-                                reference={lowercase}
-                                id={"lowercase"}
-                                label={"Lowercase"}
-                            />
-                        </div>
+                        <Preprocessing
+                            expandContractions={expandContractions}
+                            removeSpecialCharacters={removeSpecialCharacters}
+                            lowercase={lowercase}
+                        />
                         <div className="input-group d-flex bd-highlight mb-3">
                             <div className="container">
                                 <h4 className="py-2">Type Hypothesis and Reference Translations</h4>
