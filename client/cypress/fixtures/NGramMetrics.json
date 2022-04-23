@@ -1,0 +1,9 @@
+{
+  "idealCase": {
+    "metric": "chrf",
+    "metricDisplayText": "Character n-gram F-score",
+    "reference": "He is here",
+    "hypothesis": "I am here",
+    "score": 0.25
+  }
+}

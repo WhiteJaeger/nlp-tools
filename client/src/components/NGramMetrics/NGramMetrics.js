@@ -81,7 +81,7 @@ export default function NGramMetrics() {
                             <div className="input-group-prepend">
                                 <label className="input-group-text" htmlFor="metric-select">Metrics</label>
                             </div>
-                            <select className="custom-select" value={metric} name="metric" required
+                            <select className="custom-select" value={metric} name="metric" id="metric-select" required
                                     onChange={(e) => {
                                         setMetric(e.target.value)
                                     }}>

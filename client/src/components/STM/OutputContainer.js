@@ -14,16 +14,19 @@ export default function OutputContainer(props) {
                     <Card
                         title="Depth"
                         text={props.depth}
+                        id="depth"
                     />
                 </div>
                 <div className="row row-cols-1 row-cols-md-2 mt-2 text-center">
                     <Card
                         title="Subtree Metric Score"
                         text={props.score}
+                        id="subtree-score"
                     />
                     <Card
                         title="Subtree Metric Augmented Score"
                         text={props.scoreAugmented}
+                        id="subtree-augmented-score"
                     />
                 </div>
             </div>
