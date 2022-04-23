@@ -12,14 +12,18 @@ export default function OutputContainer(props) {
                         hypothesis={props.hypothesis}
                     />
                     <Card
-                        title="Metric"
-                        text={props.metric}
+                        title="Depth"
+                        text={props.depth}
                     />
                 </div>
-                <div className="row row-cols-1 mt-2 text-center">
+                <div className="row row-cols-1 row-cols-md-2 mt-2 text-center">
                     <Card
-                        title="Score"
+                        title="Subtree Metric Score"
                         text={props.score}
+                    />
+                    <Card
+                        title="Subtree Metric Augmented Score"
+                        text={props.scoreAugmented}
                     />
                 </div>
             </div>

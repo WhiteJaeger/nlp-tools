@@ -5,7 +5,8 @@ from nltk import sent_tokenize
 from pathlib import Path
 from spacy import displacy
 
-from constants import IMAGES_DIR, SPACY_MODEL, POS_TAGGER, METRICS_MAP, METRICS_FUNCTIONS
+from constants import (IMAGES_DIR, SPACY_MODEL, POS_TAGGER, METRICS_MAP,
+                       METRICS_FUNCTIONS, TF_IDF_VECTORIZER, POS_WEIGHTS)
 from text_utils import prepare_text, prepare_sentence_for_pos_tagging, map_word_to_pos
 from utils import generate_salt, purge_old_files
 
@@ -35,17 +36,17 @@ def n_gram_metric():
                                        remove_spec_characters=preprocessing['removeSpecialCharacters'])
 
     if metric in ('rouge', 'meteor', 'chrf'):
-        result = METRICS_FUNCTIONS[metric](prepared_reference, prepared_hypothesis)
+        score = METRICS_FUNCTIONS[metric](prepared_reference, prepared_hypothesis)
     else:
         prepared_hypothesis = sent_tokenize(prepared_hypothesis)
         prepared_reference = sent_tokenize(prepared_reference)
-        result = METRICS_FUNCTIONS[metric]([prepared_reference], prepared_hypothesis)
+        score = METRICS_FUNCTIONS[metric]([prepared_reference], prepared_hypothesis)
 
     output = {
         'reference': data['reference'],
         'hypothesis': data['hypothesis'],
         'metric': METRICS_MAP[metric],
-        'score': round(result, 2) if result > .001 else 0
+        'score': round(score, 2) if score > .001 else 0
     }
     return json.dumps(output)
 
@@ -88,3 +89,41 @@ def pos():
 @cross_origin()
 def serve_image(filename: str):
     return send_from_directory(IMAGES_DIR, filename)
+
+
+@api_bp.route('/stm', methods=['POST'])
+@cross_origin()
+def stm():
+    data = request.get_json()
+    preprocessing = data['preprocessing']
+    depth = int(data['depth'])
+
+    prepared_reference = prepare_text(text=data['reference'],
+                                      lowercase=preprocessing['lowercase'],
+                                      contraction_expansion=preprocessing['expandContractions'],
+                                      remove_spec_characters=preprocessing['removeSpecialCharacters'])
+    prepared_hypothesis = prepare_text(text=data['hypothesis'],
+                                       lowercase=preprocessing['lowercase'],
+                                       contraction_expansion=preprocessing['expandContractions'],
+                                       remove_spec_characters=preprocessing['removeSpecialCharacters'])
+
+    score = METRICS_FUNCTIONS['stm'](reference=prepared_reference,
+                                     hypothesis=prepared_hypothesis,
+                                     nlp_model=SPACY_MODEL,
+                                     depth=depth)
+
+    score_augmented = METRICS_FUNCTIONS['stm_augmented'](reference=prepared_reference,
+                                                         hypothesis=prepared_hypothesis,
+                                                         nlp_model=SPACY_MODEL,
+                                                         depth=depth,
+                                                         vectorizer=TF_IDF_VECTORIZER,
+                                                         pos_weights=POS_WEIGHTS)
+
+    output = {
+        'reference': data['reference'],
+        'hypothesis': data['hypothesis'],
+        'score': round(score, 2) if score > .001 else 0,
+        'scoreAugmented': round(score_augmented, 2) if score_augmented > .001 else 0,
+        'depth': depth
+    }
+    return json.dumps(output)

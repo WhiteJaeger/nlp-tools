@@ -43,7 +43,7 @@ export default function Home() {
                         <p>If you find errors or something seems ambiguous to you, please contact me via:</p>
                         <ul>
                             <li>Submitting an issue on <a className="btn-link"
-                                                          href="https://github.com/WhiteJaeger/nlp-metrics"
+                                                          href="https://github.com/WhiteJaeger/nlp-tools"
                                                           target="_blank" rel="noreferrer">Github repository</a>.
                             </li>
                             <li>Emailing me: logerk3@gmail.com</li>
