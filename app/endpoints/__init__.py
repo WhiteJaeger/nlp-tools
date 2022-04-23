@@ -7,4 +7,4 @@ STM = Blueprint('stm_api', __name__)
 
 BLUEPRINTS = (N_GRAM_METRICS, POS, SENTENCE_TREES, STM)
 
-from . import n_gram_metrics, pos, sentence_trees
+from . import n_gram_metrics, pos, sentence_trees, stm

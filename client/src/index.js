@@ -1,10 +1,14 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import {createRoot} from "react-dom/client";
 import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import './index.css';
 import {Home, Navigation, NGramMetrics, POSTagger, SentenceTrees, STM} from './components';
 
-ReactDOM.render(
+const container = document.getElementById('root');
+const root = createRoot(container);
+
+
+root.render(
     <React.StrictMode>
         <Router>
             <Navigation/>
@@ -16,6 +20,5 @@ ReactDOM.render(
                 <Route path="/stm" element={<STM/>}/>
             </Routes>
         </Router>
-    </React.StrictMode>,
-    document.getElementById('root')
+    </React.StrictMode>
 );

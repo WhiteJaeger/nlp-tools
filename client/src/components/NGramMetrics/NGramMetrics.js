@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {fetchAndSetData, postAndGetResponse} from "../../utils";
 import TextArea from "../shared/TextArea";
 import HeadContent from "../shared/HeadContent";
@@ -16,9 +16,9 @@ export default function NGramMetrics() {
     const [isLoading, setIsLoading] = useState(false);
     const [showOutput, setShowOutput] = useState(false);
     const [output, setOutput] = useState({hypothesis: '', reference: '', metric: '', score: ''});
-    const expandContractions = useRef(null);
-    const removeSpecialCharacters = useRef(null);
-    const lowercase = useRef(null);
+    const [expandContractions, setExpandContractions] = useState(false);
+    const [removeSpecialCharacters, setRemoveSpecialCharacters] = useState(false);
+    const [lowercase, setLowercase] = useState(false);
 
     useEffect(() => {
         fetchAndSetData('available-metrics', setMetrics);
@@ -39,9 +39,9 @@ export default function NGramMetrics() {
 
         const data = {
             preprocessing: {
-                expandContractions: expandContractions.current.checked,
-                lowercase: lowercase.current.checked,
-                removeSpecialCharacters: removeSpecialCharacters.current.checked,
+                expandContractions: expandContractions,
+                lowercase: lowercase,
+                removeSpecialCharacters: removeSpecialCharacters,
             },
             hypothesis: hypothesis,
             reference: reference,
@@ -52,8 +52,8 @@ export default function NGramMetrics() {
             for (const setFunction of [setMetric, setReference, setHypothesis]) {
                 setFunction('');
             }
-            for (const checkboxReference of [expandContractions, lowercase, removeSpecialCharacters]) {
-                checkboxReference.current.checked = false;
+            for (const setFunction of [setExpandContractions, setLowercase, setRemoveSpecialCharacters]) {
+                setFunction(false);
             }
 
             setOutput(serverResponse);
@@ -90,9 +90,12 @@ export default function NGramMetrics() {
                             </select>
                         </div>
                         <Preprocessing
-                            expandContractions={expandContractions}
-                            removeSpecialCharacters={removeSpecialCharacters}
-                            lowercase={lowercase}
+                            expandContractions={{value: expandContractions, setFunction: setExpandContractions}}
+                            removeSpecialCharacters={{
+                                value: removeSpecialCharacters,
+                                setFunction: setRemoveSpecialCharacters
+                            }}
+                            lowercase={{value: lowercase, setFunction: setLowercase}}
                         />
                         <div className="input-group d-flex bd-highlight mb-3">
                             <div className="container">

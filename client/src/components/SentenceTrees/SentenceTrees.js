@@ -3,7 +3,7 @@ import HeadContent from "../shared/HeadContent";
 import TextArea from "../shared/TextArea";
 import Loading from "../shared/Loading";
 import OutputContainer from "./OutputContainer";
-import {postAndGetResponse, fetchImage} from "../../utils";
+import {fetchImage, postAndGetResponse} from "../../utils";
 
 
 export default function SentenceTrees() {
