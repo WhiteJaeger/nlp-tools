@@ -8,6 +8,7 @@ from nltk.translate.gleu_score import sentence_gleu
 from nltk.translate.meteor_score import single_meteor_score
 from nltk.translate.nist_score import sentence_nist
 from rouge import Rouge
+from typing import Callable
 
 from NLP.stm_package.subtree_metric.stm import sentence_stm, sentence_stm_augmented
 
@@ -27,10 +28,23 @@ METRICS_MAP = {
     'chrf': 'Character n-gram F-score',
     'nist': 'NIST',
     'meteor': 'METEOR',
-    'rouge': 'ROUGE'
+    # 'rouge': 'ROUGE'
 }
 
 ROUGE = Rouge()
+
+
+def handle_zero_division(metric_fnc: Callable):
+    def wrapper(*args):
+        try:
+            return metric_fnc(*args)
+        except ZeroDivisionError:
+            return 0
+
+    return wrapper
+
+
+sentence_nist = handle_zero_division(sentence_nist)
 
 METRICS_FUNCTIONS = {
     'bleu': sentence_bleu,
@@ -38,7 +52,7 @@ METRICS_FUNCTIONS = {
     'chrf': sentence_chrf,
     'nist': sentence_nist,
     'meteor': single_meteor_score,
-    'rouge': ROUGE.get_scores,
+    # 'rouge': ROUGE.get_scores,
     'stm': sentence_stm,
     'stm_augmented': sentence_stm_augmented
 }
