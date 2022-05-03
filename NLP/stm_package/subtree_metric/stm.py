@@ -20,7 +20,7 @@ import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from spacy import Language
 from spacy.tokens import Token
-from typing import Union, Tuple, List, Dict
+from typing import Tuple, List
 
 from NLP.stm_package.subtree_metric.tree_constructor import SyntaxTreeHeadsExtractor, SyntaxTreeElementsExtractor
 from NLP.stm_package.subtree_metric.utils import get_similarity_between_docs, get_tfidf_scores_for_words
@@ -77,7 +77,10 @@ def are_descendants_identical(ref_extractor: SyntaxTreeElementsExtractor,
     return are_children_identical and are_grandchildren_identical
 
 
-def sentence_stm(reference: str, hypothesis: str, nlp_model: Language, depth: int = 3) -> float:
+def sentence_stm(reference: str,
+                 hypothesis: str,
+                 nlp_model: Language,
+                 depth: int = 3) -> float:
     """
     Calculate sentence-level Subtree Metric score.
         >>> hypothesis = 'It is a guide to action which ensures that the military always obeys the commands of the party'
@@ -175,9 +178,13 @@ def corpus_stm(references: List[str],
     :type nlp_model: Language
     :param depth: depth of the subtrees to take into account
     :type depth: int
-    :return: Corpus stm_package score
+    :return: STM Corpus-level score
     :rtype: float
     """
+
+    assert len(references) == len(
+        hypotheses
+    ), "The number of hypotheses and their references should be the same"
 
     score = 0
 
@@ -194,9 +201,10 @@ def sentence_stm_augmented(reference: str,
                            vectorizer: TfidfVectorizer,
                            pos_weights: dict) -> float:
     """
-    Calculate sentence-level Subtree Metric Augmented score.
+    Calculate sentence-level Subtree Metric Augmented (with additional weights) score.
 
-    :param pos_weights: Part-of-speech weights: e.g. {'PROP': 0.1, 'VERB': 0.3, ...}
+    :param pos_weights: Part-of-speech weights: e.g. {'PROP': 0.1, 'VERB': 0.3, ...}; e.g., from:
+    Sobecki, P. & Karaś, D. & Śpiewak, M. (2021)
     :param vectorizer: Trained TF-IDF vectorizer
     :param reference: reference sentence
     :type reference: str
@@ -322,10 +330,14 @@ def sentence_stm_augmented(reference: str,
 def corpus_stm_augmented(references: List[str],
                          hypotheses: List[str],
                          nlp_model: Language,
-                         depth: int = 3,
-                         make_summary: bool = True) -> Union[float, Dict[str, Union[int, list]]]:
+                         depth: int,
+                         vectorizer: TfidfVectorizer,
+                         pos_weights: dict) -> float:
     """
-    Calculate corpus-level Subtree Metric score with additional weights from embeddings
+    Calculate corpus-level Subtree Metric Augmented (with additional weights) score
+    :param pos_weights: Part-of-speech weights: e.g. {'PROP': 0.1, 'VERB': 0.3, ...}; e.g. from:
+    Sobecki, P. & Karaś, D. & Śpiewak, M. (2021)
+    :param vectorizer: Trained TF-IDF vectorizer
     :param hypotheses: hypotheses
     :type hypotheses: List[str]
     :param references: references
@@ -334,14 +346,24 @@ def corpus_stm_augmented(references: List[str],
     :type nlp_model: Language
     :param depth: depth of the subtrees to take into account
     :type depth: int
-    :param make_summary: whether to make a per-sentence summary
-    :type make_summary: bool
-    :return: stm_package-A score
+    :return: STM-A Corpus-level score
     :rtype: float
     """
+    assert len(references) == len(
+        hypotheses
+    ), "The number of hypotheses and their references should be the same"
+
     score = 0
 
-    return 1
+    for reference_sentence, hypothesis_sentence in zip(references, hypotheses):
+        score += sentence_stm_augmented(reference_sentence,
+                                        hypothesis_sentence,
+                                        nlp_model,
+                                        depth,
+                                        vectorizer,
+                                        pos_weights)
+
+    return round(score / len(references), 4)
 
 
 if __name__ == '__main__':
