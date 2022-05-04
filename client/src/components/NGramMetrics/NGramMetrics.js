@@ -5,6 +5,7 @@ import HeadContent from "../shared/HeadContent";
 import Loading from "../shared/Loading";
 import OutputContainer from "./OutputContainer";
 import Preprocessing from "../shared/Preprocessing";
+import MetricConfiguration from "./MetricConfiguration";
 
 
 export default function NGramMetrics() {
@@ -13,6 +14,7 @@ export default function NGramMetrics() {
     const [hypothesis, setHypothesis] = useState('');
     const [reference, setReference] = useState('');
     const [metric, setMetric] = useState('');
+    const [nGramLengths, setNGramLengths] = useState({minimum: 1, maximum: 4});
     const [isLoading, setIsLoading] = useState(false);
     const [showOutput, setShowOutput] = useState(false);
     const [output, setOutput] = useState({hypothesis: '', reference: '', metric: '', score: '', scores: {}});
@@ -26,7 +28,7 @@ export default function NGramMetrics() {
 
     function renderMetrics(metricsData) {
         const metricsView = []
-        metricsView.push(<option key="all" value="all">All</option>);
+        metricsView.push(<option key="all" value="all">All (with default parameters)</option>);
         for (const [metric, displayName] of Object.entries(metricsData)) {
             metricsView.push(<option key={metric} value={metric}>{displayName}</option>)
         }
@@ -89,6 +91,11 @@ export default function NGramMetrics() {
                             {renderMetrics(metrics)}
                         </select>
                     </div>
+                    {metric && <MetricConfiguration
+                        metric={metric}
+                        setFunction={setNGramLengths}
+                        nGramLengths={nGramLengths}
+                    />}
                     <Preprocessing
                         expandContractions={{value: expandContractions, setFunction: setExpandContractions}}
                         removeSpecialCharacters={{
