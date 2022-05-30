@@ -6,6 +6,8 @@ from spacy.tokens import Doc
 
 
 def cosine_similarity(vector_1: numpy.ndarray, vector_2: numpy.ndarray) -> float:
+    if not vector_1.any() or not vector_2.any():
+        return 0
     return dot(vector_1, vector_2) / (norm(vector_1) * norm(vector_2))
 
 
@@ -29,6 +31,8 @@ def apply_pos_and_tfidf_weights_to_doc_vectors(doc: Doc,
     if not tfidf_word_weights:
         tfidf_word_weights = get_tfidf_scores_for_words(doc.text.lower(), vectorizer)
     for token in doc:
+        if token.pos_ not in pos_weights or not token.vector.any():
+            continue
         weighted_vectors.append(token.vector *
                                 pos_weights[token.pos_] *
                                 tfidf_word_weights.get(token.text.lower(), 0))
