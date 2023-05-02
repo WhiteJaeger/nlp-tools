@@ -14,7 +14,7 @@ with open('README.md', 'r', encoding='utf-8') as df:
 
 setuptools.setup(
     name='subtree-metric',
-    version='0.2.4',
+    version='0.2.5',
     author='Andrej Kashchikhin',
     author_email='logerk3@gmail.com',
     description='Subtree Metric for the translation evaluation',

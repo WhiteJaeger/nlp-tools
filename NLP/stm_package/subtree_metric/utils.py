@@ -24,35 +24,22 @@ def get_tfidf_scores_for_words(text: str, vectorizer: TfidfVectorizer) -> dict:
 
 
 def apply_pos_and_tfidf_weights_to_doc_vectors(doc: Doc,
-                                               vectorizer: TfidfVectorizer,
-                                               pos_weights: dict,
-                                               tfidf_word_weights: dict = None) -> numpy.ndarray:
+                                               pos_weights: dict) -> numpy.ndarray:
     weighted_vectors = []
-    if not tfidf_word_weights:
-        tfidf_word_weights = get_tfidf_scores_for_words(doc.text.lower(), vectorizer)
     for token in doc:
         if token.pos_ not in pos_weights or not token.vector.any():
             continue
-        weighted_vectors.append(token.vector *
-                                pos_weights[token.pos_] *
-                                tfidf_word_weights.get(token.text.lower(), 0))
+        weighted_vectors.append(token.vector * pos_weights[token.pos_])
     return numpy.array(weighted_vectors)
 
 
 def get_similarity_between_docs(first_doc: Doc,
                                 second_doc: Doc,
-                                vectorizer: TfidfVectorizer,
-                                pos_weights: dict,
-                                tfidf_word_weights_first_doc: dict = None,
-                                tfidf_word_weights_second_doc: dict = None) -> float:
+                                pos_weights: dict) -> float:
     weighted_vectors_first_doc = apply_pos_and_tfidf_weights_to_doc_vectors(first_doc,
-                                                                            vectorizer,
-                                                                            pos_weights,
-                                                                            tfidf_word_weights_first_doc)
+                                                                            pos_weights)
     weighted_vectors_second_doc = apply_pos_and_tfidf_weights_to_doc_vectors(second_doc,
-                                                                             vectorizer,
-                                                                             pos_weights,
-                                                                             tfidf_word_weights_second_doc)
+                                                                             pos_weights)
 
     vector_first_doc = get_elementwise_vectors_sum(weighted_vectors_first_doc)
     vector_second_doc = get_elementwise_vectors_sum(weighted_vectors_second_doc)

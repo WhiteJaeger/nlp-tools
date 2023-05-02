@@ -22,8 +22,8 @@ from spacy import Language
 from spacy.tokens import Token
 from typing import Tuple, List
 
-from NLP.stm_package.subtree_metric.tree_constructor import SyntaxTreeHeadsExtractor, SyntaxTreeElementsExtractor
-from NLP.stm_package.subtree_metric.utils import get_similarity_between_docs, get_tfidf_scores_for_words
+from subtree_metric.tree_constructor import SyntaxTreeHeadsExtractor, SyntaxTreeElementsExtractor
+from subtree_metric.utils import get_similarity_between_docs, get_tfidf_scores_for_words
 
 
 def transform_into_tags(tokens: Tuple[Token]) -> tuple:
@@ -198,14 +198,12 @@ def sentence_stm_augmented(reference: str,
                            hypothesis: str,
                            nlp_model: Language,
                            depth: int,
-                           vectorizer: TfidfVectorizer,
                            pos_weights: dict) -> float:
     """
     Calculate sentence-level Subtree Metric Augmented (with additional weights) score.
 
     :param pos_weights: Part-of-speech weights: e.g. {'PROP': 0.1, 'VERB': 0.3, ...}; e.g., from:
     Sobecki, P. & Karaś, D. & Śpiewak, M. (2021)
-    :param vectorizer: Trained TF-IDF vectorizer
     :param reference: reference sentence
     :type reference: str
     :param hypothesis: hypothesis sentence
@@ -225,10 +223,6 @@ def sentence_stm_augmented(reference: str,
     # Get heads of syntax trees
     sentence_tree_heads_reference = SyntaxTreeHeadsExtractor(reference_preprocessed)
     sentence_tree_heads_hypothesis = SyntaxTreeHeadsExtractor(hypothesis_preprocessed)
-
-    # Get scores TF-IDF scores for words
-    tfidf_scores_reference = get_tfidf_scores_for_words(reference_preprocessed.text, vectorizer)
-    tfidf_scores_hypothesis = get_tfidf_scores_for_words(hypothesis_preprocessed.text, vectorizer)
 
     tags_first_level_hyp = transform_into_tags(sentence_tree_heads_hypothesis.first_level_heads)
 
@@ -270,10 +264,7 @@ def sentence_stm_augmented(reference: str,
 
                         weighted_count += get_similarity_between_docs(nlp_model(tree_text_reference),
                                                                       nlp_model(tree_text_hypothesis),
-                                                                      vectorizer,
-                                                                      pos_weights,
-                                                                      tfidf_scores_reference,
-                                                                      tfidf_scores_hypothesis)
+                                                                      pos_weights)
                         used_heads_indexes.append(idx)
                         break
         score += weighted_count / len(sentence_tree_heads_hypothesis.second_level_heads) \
@@ -315,10 +306,7 @@ def sentence_stm_augmented(reference: str,
 
                         weighted_count += get_similarity_between_docs(nlp_model(tree_text_reference),
                                                                       nlp_model(tree_text_hypothesis),
-                                                                      vectorizer,
-                                                                      pos_weights,
-                                                                      tfidf_scores_reference,
-                                                                      tfidf_scores_hypothesis)
+                                                                      pos_weights)
                         used_heads_indexes.append(idx)
                         break
 
@@ -331,13 +319,11 @@ def corpus_stm_augmented(references: List[str],
                          hypotheses: List[str],
                          nlp_model: Language,
                          depth: int,
-                         vectorizer: TfidfVectorizer,
                          pos_weights: dict) -> float:
     """
     Calculate corpus-level Subtree Metric Augmented (with additional weights) score
     :param pos_weights: Part-of-speech weights: e.g. {'PROP': 0.1, 'VERB': 0.3, ...}; e.g. from:
     Sobecki, P. & Karaś, D. & Śpiewak, M. (2021)
-    :param vectorizer: Trained TF-IDF vectorizer
     :param hypotheses: hypotheses
     :type hypotheses: List[str]
     :param references: references
@@ -356,12 +342,11 @@ def corpus_stm_augmented(references: List[str],
     score = 0
 
     for reference_sentence, hypothesis_sentence in zip(references, hypotheses):
-        score += sentence_stm_augmented(reference_sentence,
-                                        hypothesis_sentence,
-                                        nlp_model,
-                                        depth,
-                                        vectorizer,
-                                        pos_weights)
+        score += sentence_stm_augmented(reference=reference_sentence,
+                                        hypothesis=hypothesis_sentence,
+                                        nlp_model=nlp_model,
+                                        depth=depth,
+                                        pos_weights=pos_weights)
 
     return round(score / len(references), 4)
 
